@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: multisite_django
+    container_name: multisite_django
+    volumes:
+      - ..:/app
+    env_file:
+      - ./envs
+    ports:
+      - "8000:8000"
+    command: /start

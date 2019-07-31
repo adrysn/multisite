@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+cat <<EOF | python manage.py shell
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(username='admin').exists():
+    User.objects.create_superuser('admin', 'admin@test.com', '0')
+    print('Default "admin" user is created.')
+EOF
+python manage.py migrate
+python manage.py runserver 0.0.0.0:8000

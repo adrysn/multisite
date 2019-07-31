@@ -1,0 +1,5 @@
+django~=2.2.3
+
+# Development
+django-extensions~=2.1.6
+flake8~=3.7.5
