@@ -25,21 +25,26 @@ SECRET_KEY = '%$-69aetdnb+47c(p4k8t_(ojmg+pr_r2+5zbkm6soljuw@7q8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['site1.local', 'site2.local', 'localhost', '127.0.0.1', '0.0.0.0']
+ALLOWED_HOSTS = [
+    'site1.local', 'site2.local', 'localhost', '127.0.0.1', '0.0.0.0',
+    'site1.mysite.com', 'site2.mysite.com',
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    # Default Django apps.
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 3rd party apps.
+    # Enabled apps.
+    'django.contrib.sites',
     'django_extensions',
-    # Custom apps.
+    'apps.entry.apps.EntryConfig',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +55,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Enabled middlewares.
+    'multisite.middlewares.MultiSiteMiddleware',
+    'django.contrib.sites.middleware.CurrentSiteMiddleware',
 ]
 
 ROOT_URLCONF = 'multisite.urls'
@@ -57,14 +65,20 @@ ROOT_URLCONF = 'multisite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': False,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'multisite.context_processors.common_settings',
+            ],
+            'loaders': [
+                'multisite.template_loaders.MultiSiteLoader',
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
             ],
         },
     },
@@ -121,3 +135,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # 'multisite.static_finders.MultiSiteFinder',
+]
+
+
+DEFAULT_SITE_ID = 1
