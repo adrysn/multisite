@@ -7,14 +7,22 @@
 
   <body>
     <header>
+      <div class="logo">{% block logo %}{% endblock %}</div>
       <h1>Welcome to {{ request.site.name }}!</h1>
     </header>
     <section>
       <h2>Contents</h2>
-      {% for entry in object_list %}
-        {{ entry.title }}
-      {% endfor %}
       {% block content %}{% endblock %}
     </section>
+
+    <style>
+      header {
+        display: flex;
+        align-items: center;
+      }
+      .logo {
+        margin-right: 1em;
+      }
+    </style>
   </body>
 </html>
