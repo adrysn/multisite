@@ -1,6 +1,7 @@
 import os
 from collections import OrderedDict
 
+from django.contrib.staticfiles import utils
 from django.contrib.staticfiles.finders import BaseFinder
 # To keep track on which directories the finder has searched the static files.
 from django.contrib.staticfiles.finders import searched_locations
@@ -23,7 +24,7 @@ class MultiSiteFinder(BaseFinder):
         # Maps dir paths to an appropriate storage instance
         self.storages = OrderedDict()
         self.overload_base_directory = os.path.join(BASE_DIR, 'overload')
-        if len(self.overload_base_directory) == 0:
+        if not os.path.exists(self.overload_base_directory):
             raise ImproperlyConfigured('There is no overload static directory.')
 
         for overload_dir_info in next(os.walk(self.overload_base_directory))[1]:
@@ -69,3 +70,12 @@ class MultiSiteFinder(BaseFinder):
         path = safe_join(root, path)
         if os.path.exists(path):
             return path
+
+    def list(self, ignore_patterns):
+        """
+        List all files in all locations.
+        """
+        for prefix, root in self.locations:
+            storage = self.storages[root]
+            for path in utils.get_files(storage, ignore_patterns):
+                yield path, storage
