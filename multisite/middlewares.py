@@ -22,16 +22,9 @@ class MultiSiteMiddleware:
         # One-time configuration and initialization.
 
     def __call__(self, request):
-        # Get current site object and set SITE_ID.
         domain, _ = split_domain_port(request.get_host())
-        try:
-            current_site = Site.objects.get(domain=domain)
-        except Site.DoesNotExist:
-            current_site = Site.objects.get(id=settings.DEFAULT_SITE_ID)
-        settings.SITE_ID = current_site.id
-        request.current_site = current_site
 
-        # Get the production domain corresponding to the current site.
+        # Get the production domain corresponding to the current site in dev mode.
         if settings.DEBUG:
             try:
                 domain = MultiSiteMiddleware.OVERLOADING_MATCHING_TABLE[domain]
@@ -39,8 +32,14 @@ class MultiSiteMiddleware:
                 raise ImproperlyConfigured(
                     f'No matching overloaded domain for {domain}'
                 )
-        else:
-            domain = current_site.domain
+
+        # Get current site object and set SITE_ID.
+        try:
+            current_site = Site.objects.get(domain=domain)
+        except Site.DoesNotExist:
+            current_site = Site.objects.get(id=settings.DEFAULT_SITE_ID)
+        request.current_site = current_site
+        settings.SITE_ID = current_site.id
         settings.site_domain = domain
 
         # Determine the module path which contains site-wise assets.
